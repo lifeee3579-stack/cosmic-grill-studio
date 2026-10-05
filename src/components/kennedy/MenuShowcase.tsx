@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { DISHES, fetchDishes, BACKEND_MENU, type Dish } from "@/lib/menu";
-import { addToCart, useWishlist } from "@/lib/cart";
+import { addToCart } from "@/lib/cart";
 
 const ALL = "all";
 
@@ -108,7 +108,6 @@ function MenuSkeleton() {
 
 export function MenuShowcase() {
   const reduce = !!useReducedMotion();
-  useWishlist();
   const [active, setActive] = useState(ALL);
 
   const { data: dishes = BACKEND_MENU ? [] : DISHES, isLoading } = useQuery({
