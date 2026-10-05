@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+Menu reference styling is scoped under `.foodio-menu` with semantic tokens in the global stylesheet, so other storefront and console sections retain their themes.
