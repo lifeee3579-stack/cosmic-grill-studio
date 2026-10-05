@@ -29,7 +29,7 @@
 .foodio-menu__title { color: var(--color-menu-title); font: 400 1.5rem/1.25 var(--font-menu-heading); overflow-wrap: anywhere; letter-spacing: 0; transition: color .5s ease-in-out; }
 .foodio-menu__title:hover { color: var(--color-menu-accent); }
 .foodio-menu__price { display: block; margin-block: 1rem .75rem; color: var(--color-menu-accent); font: 400 1.75rem/1.2 var(--font-menu-heading); }
-.foodio-menu__rating { display: flex; gap: .375rem; color: var(--color-menu-primary); }
+.foodio-menu__rating { display: flex; gap: .375rem; color: var(--color-ember); }
 .foodio-menu__rating svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; }
 .foodio-menu__cart { position: absolute; right: 1rem; bottom: 1rem; width: 50px; height: 50px; border-radius: .5rem; display: grid; place-items: center; background: var(--color-menu-primary); color: var(--color-menu-title); box-shadow: none; transition: all .5s ease-in-out; }
 .foodio-menu__cart:hover { background: var(--color-menu-accent); color: var(--color-menu-card); }
