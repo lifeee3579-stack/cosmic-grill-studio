@@ -5,12 +5,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-menu-surface: oklch(0.981413113 0.006350579 261.511942848);
-  --color-menu-card: oklch(1 0 0);
-  --color-menu-title: oklch(0 0 0);
-  --color-menu-text: oklch(0.446443612 0 0);
-  --color-menu-primary: oklch(0.879187735 0.178273785 93.401664128);
-  --color-menu-accent: oklch(0.622111837 0.231802041 18.899980233);
+  /* Menu keeps the Foodio card geometry but wears Kennedy's hero biscuit palette. */
+  --color-menu-surface: var(--color-cream);
+  --color-menu-card: var(--color-cream-deep);
+  --color-menu-title: var(--color-charcoal);
+  --color-menu-text: oklch(from var(--color-charcoal) l c h / 0.72);
+  --color-menu-primary: var(--color-gold);
+  --color-menu-accent: var(--color-flame);
   --font-menu-heading: "Fredoka One", sans-serif;
   --font-menu-body: "Epilogue", sans-serif;
 }
