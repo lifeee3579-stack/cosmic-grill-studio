@@ -1,137 +1,115 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, ShoppingCart, ArrowRight, ArrowLeft, Search, Box } from "lucide-react";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import { toast } from "sonner";
-import { DISHES, fetchDishes, BACKEND_MENU, arViewUrl, type Dish } from "@/lib/menu";
+
+import { Button } from "@/components/ui/button";
+import { DISHES, fetchDishes, BACKEND_MENU, type Dish } from "@/lib/menu";
 import { addToCart, useWishlist } from "@/lib/cart";
-import { GiftRibbon } from "./GiftRibbon";
 
 const ALL = "all";
 
-/** Groups dishes into browsable categories using backend category names first. */
 function categoryOf(dish: Dish) {
   return dish.categoryName || dish.tag || "Signature";
 }
 
-type CardProps = {
+type MenuItemProps = {
   dish: Dish;
   index: number;
-  reduce: boolean;
   liked: boolean;
+  reduce: boolean;
   onToggleWish: (dish: Dish) => void;
   onAdd: (dish: Dish) => void;
-  onOrder: (dish: Dish) => void;
 };
 
-const DishGlassCard = memo(function DishGlassCard({
+const CompactMenuItem = memo(function CompactMenuItem({
   dish,
   index,
-  reduce,
   liked,
+  reduce,
   onToggleWish,
   onAdd,
-  onOrder,
-}: CardProps) {
-  const ar = arViewUrl(dish);
+}: MenuItemProps) {
   return (
     <motion.article
-      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 40, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={{
-        duration: 0.8,
-        delay: 0.06 * Math.min(index, 6),
-        ease: [0.34, 1.3, 0.64, 1],
-      }}
-      whileHover={reduce ? undefined : { y: -12, scale: 1.02 }}
-      className="glass-card group w-[calc(100vw-2.5rem)] shrink-0 snap-center sm:w-auto sm:max-w-none sm:shrink"
-      data-accent={dish.accent}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.42, delay: Math.min(index, 6) * 0.04, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative grid min-w-0 grid-cols-[6.75rem_minmax(0,1fr)] items-center gap-3 rounded-2xl bg-background p-3 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-5 sm:p-4"
     >
-      <div className="glass-card__top">
-        <div className="glass-card__price-area">
-          <span className="glass-card__old-price">Rs {dish.oldPrice}</span>
-          <span className="glass-card__new-price">Rs {dish.price}</span>
-        </div>
-        <div className="glass-card__like-area">
-          <button
-            type="button"
-            aria-label={`Add ${dish.name} to wishlist`}
-            aria-pressed={liked}
-            data-active={liked}
-            onClick={() => onToggleWish(dish)}
-            className="glass-card__like"
-          >
-            <Heart
-              className="h-[19px] w-[19px]"
-              fill={liked ? "currentColor" : "none"}
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-      </div>
-
       <Link
         to="/dish/$slug"
         params={{ slug: dish.slug }}
-        className="glass-card__image block"
         aria-label={`${dish.name} — full details`}
+        className="relative aspect-square overflow-hidden rounded-xl bg-cream-deep"
       >
-        {dish.ribbon && <GiftRibbon kind={dish.ribbon} />}
-        <img src={dish.image} alt={dish.name} loading="lazy" width={900} height={700} decoding="async" />
-        <span className="glass-card__zoom">
-          <Search className="h-4 w-4" aria-hidden="true" />
-          View details
-        </span>
+        <span className="absolute inset-y-3 left-0 w-[38%] rounded-r-full bg-flame" aria-hidden="true" />
+        <img
+          src={dish.image}
+          alt={dish.name}
+          loading="lazy"
+          width={360}
+          height={360}
+          decoding="async"
+          className="relative z-10 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
       </Link>
 
-      <div className="glass-card__content">
-        <h3 className="glass-card__name">{dish.name}</h3>
-        <p className="glass-card__subtitle">
-          {dish.tag} · {dish.desc}
-        </p>
-
-        <div className="glass-card__stats">
-          <div className="glass-card__stat">
-            <p className="glass-card__stat-value">{dish.heat}</p>
-            <p className="glass-card__stat-label">Heat</p>
+      <div className="min-w-0 py-0.5">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+          <div className="min-w-0">
+            <p className="truncate font-body text-[10px] font-extrabold tracking-[0.14em] text-flame uppercase">
+              {dish.tag}
+            </p>
+            <Link to="/dish/$slug" params={{ slug: dish.slug }}>
+              <h3 className="mt-0.5 line-clamp-2 font-display text-[1.05rem] leading-[1.05] font-extrabold text-charcoal transition-colors group-hover:text-flame sm:text-xl">
+                {dish.name}
+              </h3>
+            </Link>
           </div>
-          <div className="glass-card__stat">
-            <p className="glass-card__stat-value">{dish.time}</p>
-            <p className="glass-card__stat-label">Ready In</p>
-          </div>
-          <div className="glass-card__stat">
-            <p className="glass-card__stat-value">4.9</p>
-            <p className="glass-card__stat-label">Rating</p>
-          </div>
-        </div>
-      </div>
-
-      {ar && (
-        <div className="glass-card__ar-row">
-          <a
-            href={ar}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card__ar"
-            aria-label={`View ${dish.name} in AR`}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={liked ? `Remove ${dish.name} from wishlist` : `Add ${dish.name} to wishlist`}
+            aria-pressed={liked}
+            onClick={() => onToggleWish(dish)}
+            className={`h-8 w-8 shrink-0 rounded-full ${liked ? "bg-flame text-cream hover:bg-flame-dark hover:text-cream" : "text-charcoal/45 hover:bg-flame/10 hover:text-flame"}`}
           >
-            <Box className="h-4 w-4" aria-hidden="true" />
-            View in AR
-          </a>
+            <Heart fill={liked ? "currentColor" : "none"} aria-hidden="true" />
+          </Button>
         </div>
-      )}
 
-      <div className="glass-card__bottom">
-        <button type="button" className="glass-card__cart" onClick={() => onAdd(dish)}>
-          <ShoppingCart className="h-4 w-4" aria-hidden="true" />
-          Add to Cart
-        </button>
-        <button type="button" className="glass-card__shop" onClick={() => onOrder(dish)}>
-          Order Now
-          <ArrowRight className="h-[15px] w-[15px]" aria-hidden="true" />
-        </button>
+        <div className="mt-1.5 flex items-center gap-0.5 text-gold" aria-label="Rated 4.9 out of 5">
+          {[0, 1, 2, 3, 4].map((star) => (
+            <Star key={star} className="h-3 w-3 fill-current" aria-hidden="true" />
+          ))}
+        </div>
+
+        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+          <div className="min-w-0">
+            <span className="block font-display text-lg leading-none font-extrabold text-flame sm:text-2xl">
+              Rs {dish.price}
+            </span>
+            {dish.oldPrice && (
+              <span className="mt-1 block text-[10px] leading-none text-charcoal/45 line-through">
+                Rs {dish.oldPrice}
+              </span>
+            )}
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            aria-label={`Add ${dish.name} to cart`}
+            onClick={() => onAdd(dish)}
+            className="h-9 w-9 shrink-0 rounded-lg bg-gold text-charcoal shadow-[var(--shadow-pill)] hover:bg-ember"
+          >
+            <ShoppingBag aria-hidden="true" />
+          </Button>
+        </div>
       </div>
     </motion.article>
   );
@@ -139,17 +117,16 @@ const DishGlassCard = memo(function DishGlassCard({
 
 function MenuSkeleton() {
   return (
-    <div
-      className="scrollbar-none -mx-5 mt-3 flex gap-4 overflow-hidden px-5 pb-2 sm:hidden"
-      aria-hidden="true"
-    >
-      {[0, 1].map((i) => (
-        <div key={i} className="menu-skeleton w-[calc(100vw-2.5rem)] shrink-0 p-4">
-          <div className="menu-skeleton__block h-[172px] w-full" />
-          <div className="menu-skeleton__block mt-4 h-5 w-2/3" />
-          <div className="menu-skeleton__block mt-2 h-3 w-5/6" />
-          <div className="menu-skeleton__block mt-4 h-12 w-full" />
-          <div className="menu-skeleton__block mt-3 h-11 w-full" />
+    <div className="grid gap-3 sm:grid-cols-2 sm:gap-5" aria-hidden="true">
+      {[0, 1, 2, 3].map((item) => (
+        <div key={item} className="grid grid-cols-[6.75rem_minmax(0,1fr)] gap-3 rounded-2xl bg-background p-3 shadow-[var(--shadow-card)] sm:grid-cols-[8.5rem_minmax(0,1fr)]">
+          <div className="menu-skeleton__block aspect-square rounded-xl" />
+          <div className="py-2">
+            <div className="menu-skeleton__block h-3 w-1/3" />
+            <div className="menu-skeleton__block mt-2 h-5 w-4/5" />
+            <div className="menu-skeleton__block mt-4 h-3 w-1/2" />
+            <div className="menu-skeleton__block mt-3 h-6 w-2/5" />
+          </div>
         </div>
       ))}
     </div>
@@ -158,11 +135,8 @@ function MenuSkeleton() {
 
 export function MenuShowcase() {
   const reduce = !!useReducedMotion();
-  const navigate = useNavigate();
   const wishlist = useWishlist();
-  const [active, setActive] = useState<string>(ALL);
-  const railRef = useRef<HTMLDivElement | null>(null);
-  const [edges, setEdges] = useState({ start: true, end: false });
+  const [active, setActive] = useState(ALL);
 
   const { data: dishes = BACKEND_MENU ? [] : DISHES, isLoading } = useQuery({
     queryKey: ["menu-dishes"],
@@ -171,69 +145,27 @@ export function MenuShowcase() {
   });
 
   useEffect(() => {
-    const handleCategorySelect = (e: Event) => {
-      const customEvent = e as CustomEvent<string>;
-      if (customEvent.detail) {
-        setActive(customEvent.detail);
-      }
+    const handleCategorySelect = (event: Event) => {
+      const category = (event as CustomEvent<string>).detail;
+      if (category) setActive(category);
     };
     window.addEventListener("menu-category-select", handleCategorySelect);
-    return () => {
-      window.removeEventListener("menu-category-select", handleCategorySelect);
-    };
+    return () => window.removeEventListener("menu-category-select", handleCategorySelect);
   }, []);
 
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const d of dishes) {
-      const c = categoryOf(d);
-      counts.set(c, (counts.get(c) ?? 0) + 1);
-    }
+    dishes.forEach((dish) => {
+      const category = categoryOf(dish);
+      counts.set(category, (counts.get(category) ?? 0) + 1);
+    });
     return [...counts.entries()].map(([name, count]) => ({ name, count }));
   }, [dishes]);
 
   const visible = useMemo(
-    () => (active === ALL ? dishes : dishes.filter((d) => categoryOf(d) === active)),
-    [dishes, active],
+    () => (active === ALL ? dishes : dishes.filter((dish) => categoryOf(dish) === active)),
+    [active, dishes],
   );
-
-  const syncEdges = useCallback(() => {
-    const el = railRef.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    setEdges({
-      start: el.scrollLeft <= 4,
-      end: max <= 4 || el.scrollLeft >= max - 4,
-    });
-  }, []);
-
-  useEffect(() => {
-    const el = railRef.current;
-    if (!el) return;
-    syncEdges();
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(syncEdges);
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [syncEdges, visible.length]);
-
-  // Always move exactly one card per arrow tap.
-  const scrollRail = useCallback((dir: 1 | -1) => {
-    const el = railRef.current;
-    if (!el) return;
-    const card = el.firstElementChild as HTMLElement | null;
-    const step = card ? card.offsetWidth + 16 : el.clientWidth;
-    const index = Math.round(el.scrollLeft / step);
-    el.scrollTo({ left: Math.max(0, (index + dir) * step), behavior: "smooth" });
-  }, []);
 
   const handleToggleWish = useCallback(
     (dish: Dish) => {
@@ -253,144 +185,69 @@ export function MenuShowcase() {
     });
   }, []);
 
-  const handleOrder = useCallback(
-    (dish: Dish) => {
-      handleAdd(dish);
-      void navigate({ to: "/cart" });
-    },
-    [handleAdd, navigate],
-  );
-
   return (
-    <section id="menu" className="relative overflow-x-clip bg-cream py-16 sm:py-24">
+    <section id="menu" className="relative overflow-x-clip bg-cream py-12 sm:py-20">
       <div className="pointer-events-none absolute inset-0 menu-grain" aria-hidden="true" />
-
-      <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8">
-        {/* heading */}
-        <motion.div
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 26 }}
+      <div className="relative mx-auto max-w-[1180px] px-4 sm:px-8">
+        <motion.header
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="relative"
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center"
         >
-          <span className="relative -top-1 -rotate-6 inline-block font-poster text-3xl text-ember uppercase [-webkit-text-stroke:6px_var(--color-cream)] [paint-order:stroke_fill] sm:text-5xl">
-            The Best
-          </span>
+          <span className="font-poster text-2xl text-ember uppercase sm:text-3xl">Fresh from the fire</span>
+          <h2 className="mt-1 font-hero text-4xl leading-none text-charcoal uppercase sm:text-6xl">Our Menu</h2>
+          <span className="mx-auto mt-3 block h-1.5 w-24 rounded-full bg-gold" aria-hidden="true" />
+        </motion.header>
 
-          <h2 className="poster-title mt-1 text-[19vw] sm:text-[14vw] lg:text-[11rem]">
-            <span className="block">Our Finest</span>
-            <span className="block">Fire Picks</span>
-          </h2>
-
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-            <p className="max-w-xl font-body text-sm text-charcoal/75 sm:text-base">
-              Hand-crafted plates from the Moon Grill Narowal legacy — charcoal smoke,
-              stone-baked crusts and chili heat tuned to your taste. Tap any photo for the
-              full story, zoom and nutrition.
-            </p>
-            <span className="font-display text-xs font-extrabold tracking-[0.24em] text-charcoal/70 uppercase">
-              {visible.length} Items
-            </span>
-          </div>
-        </motion.div>
-
-        {/* sticky category rail — the main way to browse on a phone */}
-        <div className="sticky top-0 z-40 -mx-5 mt-6 border-y border-charcoal/10 bg-cream/92 px-5 py-2.5 backdrop-blur-md sm:-mx-8 sm:px-8 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:backdrop-blur-none">
-          <div
-            className="scrollbar-none flex gap-2 overflow-x-auto"
-            role="tablist"
-            aria-label="Menu categories"
-          >
-            {[{ name: ALL, count: dishes.length }, ...categories].map((c) => {
-              const on = active === c.name;
+        <div className="sticky top-0 z-40 -mx-4 mt-6 border-y border-charcoal/10 bg-cream/95 px-4 py-2.5 backdrop-blur-md sm:static sm:mx-0 sm:mt-8 sm:border-0 sm:bg-transparent sm:px-0 sm:backdrop-blur-none">
+          <div className="scrollbar-none flex gap-2 overflow-x-auto sm:justify-center" role="tablist" aria-label="Menu categories">
+            {[{ name: ALL, count: dishes.length }, ...categories].map((category) => {
+              const selected = active === category.name;
               return (
-                <motion.button
-                  key={c.name}
+                <Button
+                  key={category.name}
                   type="button"
                   role="tab"
-                  aria-selected={on}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={() => {
-                    setActive(c.name);
-                    railRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-                  }}
-                  className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 font-display text-[11px] font-extrabold tracking-[0.14em] uppercase transition-all duration-300 ${
-                    on
-                      ? "border-flame bg-flame text-cream shadow-[0_8px_18px_rgba(180,40,20,0.28)]"
-                      : "border-charcoal/15 bg-cream/70 text-charcoal/70 hover:border-flame/40 hover:text-charcoal"
-                  }`}
+                  aria-selected={selected}
+                  variant={selected ? "default" : "outline"}
+                  onClick={() => setActive(category.name)}
+                  className={`h-9 shrink-0 rounded-full px-4 font-display text-[11px] font-extrabold tracking-[0.1em] uppercase ${selected ? "bg-flame text-cream hover:bg-flame-dark" : "border-charcoal/15 bg-cream text-charcoal/70 hover:border-flame/40 hover:bg-flame/10 hover:text-flame"}`}
                 >
-                  {c.name === ALL ? "All" : c.name}
-                  <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
-                      on ? "bg-cream/25 text-cream" : "bg-charcoal/10 text-charcoal/60"
-                    }`}
-                  >
-                    {c.count}
-                  </span>
-                </motion.button>
+                  {category.name === ALL ? "All" : category.name}
+                  <span className={selected ? "text-cream/75" : "text-charcoal/40"}>{category.count}</span>
+                </Button>
               );
             })}
           </div>
         </div>
 
-        {/* mobile hint */}
-        <div className="mt-6 flex items-center gap-2 sm:hidden">
-          <motion.span
-            aria-hidden="true"
-            animate={reduce ? undefined : { x: [0, 6, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            className="font-display text-[11px] font-extrabold tracking-[0.18em] text-charcoal/60 uppercase"
-          >
-            Swipe to explore →
-          </motion.span>
+        <div className="mt-5 flex items-center justify-between gap-4 sm:mt-8">
+          <p className="font-display text-xs font-extrabold tracking-[0.16em] text-charcoal/55 uppercase">
+            {active === ALL ? "All dishes" : active}
+          </p>
+          <p className="shrink-0 font-body text-xs text-charcoal/55">{visible.length} items</p>
         </div>
 
-        {/* mobile-only loading skeleton */}
-        {isLoading && <MenuSkeleton />}
-
-        {/* cards */}
-        <div
-          ref={railRef}
-          className={`scrollbar-none -mx-5 mt-3 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto overscroll-x-contain px-5 pb-2 [scroll-behavior:smooth] [-webkit-overflow-scrolling:touch] sm:mx-0 sm:mt-14 sm:grid sm:snap-none sm:gap-8 sm:overflow-visible sm:px-0 sm:pb-0 sm:grid-cols-2 lg:grid-cols-3 ${isLoading ? "max-sm:hidden" : ""}`}
-        >
-          {visible.map((dish, i) => (
-            <DishGlassCard
-              key={dish.slug}
-              dish={dish}
-              index={i}
-              reduce={reduce}
-              liked={wishlist.has(dish.slug)}
-              onToggleWish={handleToggleWish}
-              onAdd={handleAdd}
-              onOrder={handleOrder}
-            />
-          ))}
-        </div>
-
-        {/* mobile arrows */}
-        <div className="mt-5 flex items-center justify-center gap-4 sm:hidden">
-          <motion.button
-            type="button"
-            aria-label="Previous dish"
-            disabled={edges.start}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => scrollRail(-1)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-charcoal/15 bg-cream text-charcoal shadow-[0_6px_14px_rgba(60,20,10,0.15)] transition-opacity duration-300 disabled:pointer-events-none disabled:opacity-30"
-          >
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          </motion.button>
-          <motion.button
-            type="button"
-            aria-label="Next dish"
-            disabled={edges.end}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => scrollRail(1)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-flame bg-flame text-cream shadow-[0_8px_18px_rgba(180,40,20,0.28)] transition-opacity duration-300 disabled:pointer-events-none disabled:opacity-30"
-          >
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </motion.button>
+        <div className="mt-3">
+          {isLoading ? (
+            <MenuSkeleton />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-5">
+              {visible.map((dish, index) => (
+                <CompactMenuItem
+                  key={dish.slug}
+                  dish={dish}
+                  index={index}
+                  liked={wishlist.has(dish.slug)}
+                  reduce={reduce}
+                  onToggleWish={handleToggleWish}
+                  onAdd={handleAdd}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
