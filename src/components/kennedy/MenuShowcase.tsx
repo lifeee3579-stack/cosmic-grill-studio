@@ -8,8 +8,24 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DISHES, fetchDishes, BACKEND_MENU, type Dish } from "@/lib/menu";
 import { addToCart } from "@/lib/cart";
+import grillCutout from "@/assets/menu-grill-cutout.png";
+import karahiCutout from "@/assets/menu-karahi-cutout.png";
+import biryaniCutout from "@/assets/menu-biryani-cutout.png";
+import naanCutout from "@/assets/menu-naan-cutout.png";
+import dessertCutout from "@/assets/menu-dessert-cutout.png";
 
 const ALL = "all";
+
+// Presentation-only overrides: never alter the backend dish or cart record.
+function menuImage(dish: Dish) {
+  const name = dish.name.toLowerCase();
+  if (/gulab\s*jamun/.test(name)) return dessertCutout;
+  if (/naan|roghni/.test(name)) return naanCutout;
+  if (/biryani|baryani|pulao/.test(name)) return biryaniCutout;
+  if (/karahi|kata\s*kat/.test(name)) return karahiCutout;
+  if (/boti|kabab|kebab|tikka/.test(name)) return grillCutout;
+  return dish.image;
+}
 
 function categoryOf(dish: Dish) {
   return dish.categoryName || dish.tag || "Signature";
@@ -28,6 +44,8 @@ const CompactMenuItem = memo(function CompactMenuItem({
   reduce,
   onAdd,
 }: MenuItemProps) {
+  const image = menuImage(dish);
+  const isCutout = image !== dish.image;
   return (
     <motion.article
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
@@ -43,14 +61,22 @@ const CompactMenuItem = memo(function CompactMenuItem({
         className="foodio-menu__image"
       >
 
-        <img
-          src={dish.image}
+        <motion.img
+          src={image}
           alt={dish.name}
           loading="lazy"
-          width={360}
-          height={360}
+          width={1024}
+          height={1024}
           decoding="async"
           className="foodio-menu__img"
+          whileInView={reduce || !isCutout ? { y: 0 } : { y: [0, -4, 0] }}
+          viewport={{ amount: 0.2 }}
+          whileHover={reduce ? undefined : { scale: 1.06, rotate: -2 }}
+          transition={{
+            y: { duration: 4.5, repeat: reduce || !isCutout ? 0 : Infinity, ease: "easeInOut", delay: (index % 5) * 0.35 },
+            scale: { duration: 0.3 },
+            rotate: { duration: 0.3 },
+          }}
         />
       </Link>
 
