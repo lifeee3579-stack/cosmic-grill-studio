@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 Menu reference styling is scoped under `.foodio-menu` with semantic tokens in the global stylesheet, so other storefront and console sections retain their themes.
+Generated menu cutouts are selected by dish name within the menu presentation only; unmatched dishes retain their original images so backend records, detail pages, and cart behavior stay unchanged.
