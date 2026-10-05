@@ -1,9 +1,66 @@
-@import url("https://fonts.googleapis.com/css2?family=Anton&family=Baloo+2:wght@600;700;800&family=Mouse+Memoirs&family=Nunito:wght@400;600;800&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-menu-surface: oklch(0.981413113 0.006350579 261.511942848);
+  --color-menu-card: oklch(1 0 0);
+  --color-menu-title: oklch(0 0 0);
+  --color-menu-text: oklch(0.446443612 0 0);
+  --color-menu-primary: oklch(0.879187735 0.178273785 93.401664128);
+  --color-menu-accent: oklch(0.622111837 0.231802041 18.899980233);
+  --font-menu-heading: "Fredoka One", sans-serif;
+  --font-menu-body: "Epilogue", sans-serif;
+}
+
+.foodio-menu { background: var(--color-menu-surface); color: var(--color-menu-text); padding-block: 7.5rem; overflow: clip; font-family: var(--font-menu-body); letter-spacing: 0; }
+.foodio-menu__container { max-width: 1320px; margin-inline: auto; padding-inline: .75rem; }
+.foodio-menu__heading { position: relative; max-width: 800px; margin: 0 auto 5rem; text-align: center; }
+.foodio-menu__heading h2 { font: 400 3.75rem/1.2 var(--font-menu-heading); color: var(--color-menu-title); letter-spacing: 0; }
+.foodio-menu__heading::after { content: ""; position: absolute; left: 50%; bottom: -1.25rem; transform: translateX(-50%); width: 270px; height: 12px; border-radius: 1.5rem; background: var(--color-menu-primary); }
+.foodio-menu__grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.5rem; align-items: start; }
+.foodio-menu__item { position: relative; min-width: 0; background: var(--color-menu-card); border-radius: 1.5rem; margin-left: 5.25rem; padding: 3.25rem 1.5rem 3.25rem 7.5rem; }
+.foodio-menu__image { position: absolute; top: 50%; transform: translateY(-50%); left: -5.25rem; width: 210px; height: 190px; }
+.foodio-menu__image::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 70%; height: 115%; border-radius: 5.5rem; background: var(--color-menu-accent); }
+.foodio-menu__img { position: relative; z-index: 10; width: 100%; height: 100%; object-fit: contain; }
+.foodio-menu__title { color: var(--color-menu-title); font: 400 1.5rem/1.25 var(--font-menu-heading); overflow-wrap: anywhere; letter-spacing: 0; transition: color .5s ease-in-out; }
+.foodio-menu__title:hover { color: var(--color-menu-accent); }
+.foodio-menu__price { display: block; margin-block: 1rem .75rem; color: var(--color-menu-accent); font: 400 1.75rem/1.2 var(--font-menu-heading); }
+.foodio-menu__rating { display: flex; gap: .375rem; color: var(--color-menu-primary); }
+.foodio-menu__rating svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; }
+.foodio-menu__cart { position: absolute; right: 1rem; bottom: 1rem; width: 50px; height: 50px; border-radius: .5rem; display: grid; place-items: center; background: var(--color-menu-primary); color: var(--color-menu-title); box-shadow: none; transition: all .5s ease-in-out; }
+.foodio-menu__cart:hover { background: var(--color-menu-accent); color: var(--color-menu-card); }
+.foodio-menu__cart .foodio-menu__bag { width: 2rem; height: 2rem; }
+.foodio-menu__filters { display: flex; gap: 1.5rem; overflow-x: auto; margin: -1rem 0 3rem; padding-bottom: 2px; border-bottom: 1px solid color-mix(in oklch,var(--color-menu-text) 15%, transparent); scrollbar-width: thin; scrollbar-color: var(--color-menu-primary) transparent; }
+.foodio-menu__filter { flex-shrink: 0; position: relative; border-radius: 0; padding: .875rem .25rem; height: auto; gap: .625rem; background: transparent; color: var(--color-menu-text); font: 400 1rem var(--font-menu-heading); letter-spacing: 0; border-bottom: 3px solid transparent; }
+.foodio-menu__filter:hover { background: transparent; color: var(--color-menu-accent); }
+.foodio-menu__filter--active { color: var(--color-menu-accent); border-bottom-color: var(--color-menu-primary); }
+.foodio-menu__filter svg { width: 20px; height: 20px; }
+.foodio-menu__count { font: 400 .75rem var(--font-menu-body); }
+.foodio-menu__filter:focus-visible, .foodio-menu__cart:focus-visible { outline: 2px solid var(--color-menu-accent); outline-offset: 3px; }
+@media (max-width: 1400px) {
+  .foodio-menu__container { max-width: 1140px; }
+  .foodio-menu__heading h2 { font-size: 3rem; }
+  .foodio-menu__heading::after { width: 240px; height: 10px; }
+  .foodio-menu__item { margin-left: 4rem; }
+  .foodio-menu__image { left: -4rem; width: 184px; height: 167px; }
+  .foodio-menu__title { font-size: 1.25rem; }
+  .foodio-menu__price { font-size: 1.5rem; }
+  .foodio-menu__rating svg { width: 1rem; height: 1rem; }
+  .foodio-menu__cart { width: 40px; height: 40px; }
+  .foodio-menu__cart .foodio-menu__bag { width: 1.5rem; height: 1.5rem; }
+}
+@media (max-width: 1200px) { .foodio-menu__container { max-width: 960px; } .foodio-menu__grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 992px) { .foodio-menu__container { max-width: 720px; } .foodio-menu__grid { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 768px) { .foodio-menu { padding-block: 6rem; } .foodio-menu__container { max-width: 540px; } .foodio-menu__heading h2 { font-size: 2.5rem; } .foodio-menu__heading::after { max-width: 200px; height: 8px; } }
+@media (max-width: 450px) {
+  .foodio-menu__item { padding: 6rem 1.5rem 1.5rem; margin-top: 6rem; margin-left: 0; border-radius: 1rem; }
+  .foodio-menu__image { width: 175px; height: 154px; top: -38%; left: 1.5rem; transform: none; }
+  .foodio-menu__filters { gap: 1rem; margin-bottom: 1.5rem; }
+}
+
 
 @theme {
   --font-display: "Baloo 2", system-ui, sans-serif;
